@@ -294,6 +294,47 @@ class UIComponents:
         """, unsafe_allow_html=True)
     
     @staticmethod
+    def render_feature_card(title: str, description: str, color: str = None):
+        """Render a feature card with Berkeley styling"""
+        if not color:
+            color = UIComponents.BERKELEY_BLUE
+        
+        st.markdown(f"""
+        <div style='
+            background: linear-gradient(135deg, {color} 0%, rgba(0, 50, 98, 0.8) 100%);
+            padding: 1.5rem;
+            border-radius: 15px;
+            border: 2px solid {UIComponents.CALIFORNIA_GOLD};
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            margin-bottom: 1rem;
+            transition: transform 0.3s;
+        '>
+            <h3 style='color: {UIComponents.CALIFORNIA_GOLD}; margin: 0 0 0.5rem 0;'>{title}</h3>
+            <p style='color: #ffffff; margin: 0;'>{description}</p>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    @staticmethod
+    def render_stats_dashboard(stats: Dict[str, Any]):
+        """Render statistics dashboard with Berkeley styling"""
+        cols = st.columns(len(stats))
+        for i, (label, value) in enumerate(stats.items()):
+            with cols[i]:
+                st.markdown(f"""
+                <div style='
+                    background: linear-gradient(135deg, rgba(0, 50, 98, 0.9) 0%, rgba(59, 126, 161, 0.9) 100%);
+                    border: 2px solid {UIComponents.CALIFORNIA_GOLD};
+                    padding: 1rem;
+                    border-radius: 10px;
+                    text-align: center;
+                    box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+                '>
+                    <p style='color: {UIComponents.CALIFORNIA_GOLD}; font-weight: 600; margin: 0; font-size: 0.9em;'>{label}</p>
+                    <h2 style='color: #ffffff; margin: 0.5rem 0 0 0;'>{value}</h2>
+                </div>
+                """, unsafe_allow_html=True)
+    
+    @staticmethod
     def render_modern_header():
         """Render header with Club Stride branding"""
         st.markdown(f"""
