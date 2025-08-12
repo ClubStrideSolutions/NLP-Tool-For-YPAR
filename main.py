@@ -76,9 +76,9 @@ class Config:
             'batch_size': 3,
             'cache_ttl': 3600,
             'theme_colors': {
-                'primary': '#2874a6',
-                'secondary': '#154360',
-                'background': '#eaf2f8',
+                'primary': '#003262',      # Cal Blue
+                'secondary': '#FDB515',    # California Gold
+                'background': '#f0f4f7',   # Light gray-blue
                 'text': '#2c3e50',
                 'success': '#27ae60'
             }
@@ -210,17 +210,18 @@ def apply_custom_css():
     <style>
     .main-title {{
         font-size: 2.8em;
-        color: {colors['secondary']};
+        color: {colors['primary']};
         text-align: center;
         margin-bottom: 1em;
         font-weight: bold;
+        text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
     }}
     .section-title {{
         font-size: 2em;
-        color: {colors['secondary']};
+        color: {colors['primary']};
         margin-top: 1em;
         margin-bottom: 0.5em;
-        border-bottom: 3px solid {colors['primary']};
+        border-bottom: 3px solid {colors['secondary']};
         padding-bottom: 0.3em;
     }}
     .info-box {{
@@ -256,8 +257,9 @@ def apply_custom_css():
         transition: all 0.3s;
     }}
     .stButton>button:hover {{
-        background-color: {colors['secondary']};
+        background-color: #1a4a7a;  /* Darker Cal Blue on hover */
         box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        transform: translateY(-2px);
     }}
     .result-box {{
         background-color: {colors['background']};
@@ -267,12 +269,20 @@ def apply_custom_css():
         border-left: 5px solid {colors['success']};
         color: {colors['text']};
     }}
+    .sidebar-title {{
+        font-size: 1.8em;
+        color: {colors['primary']};
+        margin-bottom: 1em;
+        text-align: center;
+        border-bottom: 2px solid {colors['secondary']};
+        padding-bottom: 0.5em;
+    }}
     .health-good {{
         color: #27ae60;
         font-weight: bold;
     }}
     .health-warning {{
-        color: #f39c12;
+        color: {colors['secondary']};  /* California Gold for warnings */
         font-weight: bold;
     }}
     .health-error {{
@@ -1559,8 +1569,8 @@ def show_settings_page():
 def show_footer():
     """Display footer"""
     st.markdown("""
-    <div style="text-align: center; margin-top: 2em; padding: 1em; background-color: #eaf2f8; border-radius: 10px; border-top: 2px solid #2874a6;">
-        <p style="color: #2c3e50; font-weight: bold;">
+    <div style="text-align: center; margin-top: 2em; padding: 1em; background-color: #f0f4f7; border-radius: 10px; border-top: 3px solid #FDB515;">
+        <p style="color: #003262; font-weight: bold;">
             © 2024 NLP Tool for YPAR | Unified Version 3.0 | 
             Combining Stability & Advanced Features
         </p>
