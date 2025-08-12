@@ -151,16 +151,33 @@ else:
 
 # Initialize NLTK
 try:
-    if stability_available:
-        safe_nltk_download()
-    else:
-        for package in ['punkt', 'stopwords', 'vader_lexicon', 'maxent_ne_chunker', 'words', 'averaged_perceptron_tagger']:
+    # Download all required NLTK data
+    required_nltk_data = [
+        'punkt', 
+        'punkt_tab',  # New tokenizer format
+        'stopwords', 
+        'vader_lexicon', 
+        'maxent_ne_chunker', 
+        'words', 
+        'averaged_perceptron_tagger',
+        'averaged_perceptron_tagger_eng'
+    ]
+    
+    for package in required_nltk_data:
+        try:
+            nltk.data.find(f'tokenizers/{package}' if 'punkt' in package else package)
+        except LookupError:
             try:
-                nltk.data.find(package)
-            except LookupError:
                 nltk.download(package, quiet=True)
-except:
-    pass
+            except:
+                # If specific package fails, try without quiet mode
+                if package == 'punkt_tab':
+                    try:
+                        nltk.download('punkt', quiet=True)
+                    except:
+                        pass
+except Exception as e:
+    logger.warning(f"NLTK initialization warning: {e}")
 
 # Configuration
 class Config:

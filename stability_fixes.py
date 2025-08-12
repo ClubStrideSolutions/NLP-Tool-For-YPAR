@@ -259,18 +259,37 @@ def validate_and_sanitize_input(text: str, max_length: int = 100000) -> Optional
 def safe_nltk_download():
     """Safely download NLTK data with error handling"""
     import nltk
-    packages = ['punkt', 'stopwords', 'vader_lexicon', 'maxent_ne_chunker', 
-                'words', 'averaged_perceptron_tagger']
+    packages = [
+        'punkt', 
+        'punkt_tab',  # New NLTK tokenizer format
+        'stopwords', 
+        'vader_lexicon', 
+        'maxent_ne_chunker', 
+        'words', 
+        'averaged_perceptron_tagger',
+        'averaged_perceptron_tagger_eng'
+    ]
     
     for package in packages:
         try:
-            nltk.data.find(f'tokenizers/{package}' if package == 'punkt' else package)
+            # Check if package exists
+            if 'punkt' in package:
+                nltk.data.find(f'tokenizers/{package}')
+            else:
+                nltk.data.find(package)
             logger.debug(f"NLTK package '{package}' already downloaded")
         except LookupError:
             try:
                 logger.info(f"Downloading NLTK package: {package}")
                 nltk.download(package, quiet=True)
             except Exception as e:
+                # Special handling for punkt_tab - fallback to punkt
+                if package == 'punkt_tab':
+                    try:
+                        logger.info("Falling back to standard punkt tokenizer")
+                        nltk.download('punkt', quiet=True)
+                    except:
+                        pass
                 logger.warning(f"Failed to download NLTK package '{package}': {e}")
 
 class ErrorHandler:
