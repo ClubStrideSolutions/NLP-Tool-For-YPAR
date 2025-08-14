@@ -1,0 +1,542 @@
+================================================================================
+                    CAL COLORS UI DESIGN GUIDE
+                UC Berkeley Themed Application Design System
+================================================================================
+
+BRAND COLORS
+================================================================================
+Primary Colors:
+- Berkeley Blue: #003262 (RGB: 0, 50, 98)
+- California Gold: #FDB515 (RGB: 253, 181, 21)
+
+Secondary Colors:
+- Founders Rock: #3B7EA1 (RGB: 59, 126, 161)
+- Light Gray: #C4820E (RGB: 196, 130, 14)
+- Medalist: #FFC72C (RGB: 255, 199, 44)
+
+Background Colors:
+- Primary Background: #FFFFFF (White)
+- Secondary Background: #F8F9FA (Light Gray)
+- Card Background: #FFFFFF with shadow
+
+Text Colors:
+- Primary Text: #212529 (Dark Gray)
+- Secondary Text: #6C757D (Medium Gray)
+- Link Text: #003262 (Berkeley Blue)
+- Link Hover: #004d8a (Darker Blue)
+
+Status Colors:
+- Success: #28A745 (Green)
+- Warning: #FFC107 (Amber)
+- Error: #DC3545 (Red)
+- Info: #17A2B8 (Cyan)
+
+================================================================================
+STREAMLIT CSS STYLING
+================================================================================
+
+/* Main Theme Configuration */
+.stApp {
+    background: linear-gradient(135deg, #003262 0%, #004d8a 100%);
+}
+
+/* Page Header Styling */
+.main-header {
+    background: linear-gradient(135deg, #003262, #004d8a);
+    color: white;
+    padding: 2rem;
+    border-radius: 10px;
+    text-align: center;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 15px rgba(0, 50, 98, 0.2);
+}
+
+.main-header h1 {
+    color: #FDB515;
+    font-size: 2.5rem;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Navigation Sidebar */
+.nav-container {
+    padding: 5px;
+    background-color: #003262;
+    border-radius: 10px;
+}
+
+.nav-icon {
+    color: #FDB515;
+    font-size: 18px;
+}
+
+.nav-link {
+    color: #ffffff;
+    font-size: 14px;
+    text-align: left;
+    margin: 2px;
+    padding: 10px;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.nav-link:hover {
+    background-color: #004d8a;
+}
+
+.nav-link-selected {
+    background-color: #FDB515;
+    color: #003262;
+    font-weight: bold;
+    box-shadow: 0 2px 8px rgba(253, 181, 21, 0.3);
+}
+
+/* Buttons */
+button[kind="primary"] {
+    background-color: #003262;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 5px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+button[kind="primary"]:hover {
+    background-color: #004d8a;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 50, 98, 0.3);
+}
+
+button[kind="secondary"] {
+    background-color: #FDB515;
+    color: #003262;
+    border: 2px solid #003262;
+    padding: 0.5rem 1rem;
+    border-radius: 5px;
+    font-weight: 500;
+}
+
+/* Cards and Containers */
+.stContainer {
+    background: white;
+    border-radius: 10px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    margin-bottom: 1rem;
+}
+
+/* Metrics */
+[data-testid="metric-container"] {
+    background: linear-gradient(135deg, #003262, #004d8a);
+    padding: 1rem;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0, 50, 98, 0.2);
+}
+
+[data-testid="metric-container"] [data-testid="metric-label"] {
+    color: #FDB515;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+[data-testid="metric-container"] [data-testid="metric-value"] {
+    color: white;
+    font-weight: bold;
+    font-size: 1.8rem;
+}
+
+/* Expanders */
+.streamlit-expanderHeader {
+    background-color: #003262;
+    color: white;
+    border-radius: 5px;
+    padding: 0.5rem;
+}
+
+.streamlit-expanderHeader:hover {
+    background-color: #004d8a;
+}
+
+/* Progress Bars */
+.stProgress > div > div > div {
+    background-color: #FDB515;
+}
+
+/* Tabs */
+.stTabs [data-baseweb="tab-list"] {
+    background-color: #F8F9FA;
+    border-radius: 10px;
+    padding: 5px;
+}
+
+.stTabs [data-baseweb="tab"] {
+    color: #003262;
+    font-weight: 500;
+}
+
+.stTabs [data-baseweb="tab"][aria-selected="true"] {
+    background-color: #003262;
+    color: #FDB515;
+    border-radius: 5px;
+}
+
+/* Input Fields */
+.stTextInput > div > div > input {
+    border: 2px solid #003262;
+    border-radius: 5px;
+    padding: 0.5rem;
+}
+
+.stTextInput > div > div > input:focus {
+    border-color: #FDB515;
+    box-shadow: 0 0 0 2px rgba(253, 181, 21, 0.2);
+}
+
+/* Select Boxes */
+.stSelectbox > div > div {
+    border: 2px solid #003262;
+    border-radius: 5px;
+}
+
+/* File Uploader */
+[data-testid="stFileUploadDropzone"] {
+    border: 2px dashed #003262;
+    border-radius: 10px;
+    background-color: rgba(0, 50, 98, 0.05);
+}
+
+/* Success/Error/Warning/Info Messages */
+.stAlert {
+    border-radius: 5px;
+    padding: 1rem;
+}
+
+div[data-baseweb="notification"][kind="info"] {
+    background-color: rgba(0, 50, 98, 0.1);
+    border-left: 4px solid #003262;
+}
+
+div[data-baseweb="notification"][kind="success"] {
+    background-color: rgba(40, 167, 69, 0.1);
+    border-left: 4px solid #28A745;
+}
+
+div[data-baseweb="notification"][kind="warning"] {
+    background-color: rgba(253, 181, 21, 0.1);
+    border-left: 4px solid #FDB515;
+}
+
+div[data-baseweb="notification"][kind="error"] {
+    background-color: rgba(220, 53, 69, 0.1);
+    border-left: 4px solid #DC3545;
+}
+
+================================================================================
+PYTHON STREAMLIT IMPLEMENTATION
+================================================================================
+
+import streamlit as st
+
+def apply_cal_colors_theme():
+    """Apply Cal Colors theme to Streamlit app"""
+    st.markdown("""
+    <style>
+    /* Insert all CSS from above */
+    </style>
+    """, unsafe_allow_html=True)
+
+def create_header():
+    """Create branded header"""
+    st.markdown("""
+    <div class="main-header">
+        <h1>🐻 Your Application Title</h1>
+        <p style="color: white; font-size: 1.1rem;">
+            UC Berkeley Themed Application
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+
+def create_metric_card(label, value, delta=None):
+    """Create a styled metric card"""
+    col = st.container()
+    with col:
+        st.markdown(f"""
+        <div style="background: linear-gradient(135deg, #003262, #004d8a); 
+                    padding: 1rem; border-radius: 10px; 
+                    box-shadow: 0 2px 8px rgba(0, 50, 98, 0.2);">
+            <p style="color: #FDB515; font-weight: 600; margin: 0;">{label}</p>
+            <h2 style="color: white; margin: 0;">{value}</h2>
+            {f'<p style="color: #FDB515; font-size: 0.9rem; margin: 0;">{delta}</p>' if delta else ''}
+        </div>
+        """, unsafe_allow_html=True)
+
+def create_info_card(title, content, icon="ℹ️"):
+    """Create an information card"""
+    st.markdown(f"""
+    <div style="background: white; padding: 1.5rem; border-radius: 10px;
+                box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); margin-bottom: 1rem;">
+        <h3 style="color: #003262; margin-top: 0;">
+            {icon} {title}
+        </h3>
+        <p style="color: #212529;">{content}</p>
+    </div>
+    """, unsafe_allow_html=True)
+
+def create_button_row(buttons):
+    """Create a row of styled buttons
+    buttons: list of tuples (label, key, type)
+    """
+    cols = st.columns(len(buttons))
+    results = []
+    for col, (label, key, btn_type) in zip(cols, buttons):
+        with col:
+            if btn_type == "primary":
+                results.append(st.button(label, key=key, type="primary"))
+            else:
+                results.append(st.button(label, key=key))
+    return results
+
+================================================================================
+NAVIGATION IMPLEMENTATION (with streamlit-option-menu)
+================================================================================
+
+from streamlit_option_menu import option_menu
+
+def create_sidebar_navigation():
+    """Create Cal Colors themed sidebar navigation"""
+    with st.sidebar:
+        selected = option_menu(
+            menu_title="Navigation",
+            options=[
+                "🏠 Home",
+                "📊 Analytics", 
+                "📈 Visualizations",
+                "⚙️ Settings"
+            ],
+            icons=["house-fill", "graph-up-arrow", "bar-chart-fill", "gear-fill"],
+            menu_icon="grid-fill",
+            default_index=0,
+            orientation="vertical",
+            styles={
+                "container": {
+                    "padding": "5px",
+                    "background-color": "#003262",
+                    "border-radius": "10px"
+                },
+                "icon": {
+                    "color": "#FDB515", 
+                    "font-size": "18px"
+                },
+                "nav-link": {
+                    "color": "#ffffff",
+                    "font-size": "14px",
+                    "text-align": "left",
+                    "margin": "2px",
+                    "padding": "10px",
+                    "border-radius": "8px",
+                    "--hover-color": "#004d8a",
+                    "transition": "all 0.3s ease"
+                },
+                "nav-link-selected": {
+                    "background-color": "#FDB515",
+                    "color": "#003262",
+                    "font-weight": "bold",
+                    "box-shadow": "0 2px 8px rgba(253, 181, 21, 0.3)"
+                }
+            }
+        )
+    return selected
+
+================================================================================
+COMPONENT EXAMPLES
+================================================================================
+
+# 1. Status Indicators
+def show_status(connected=True):
+    if connected:
+        st.success("✅ System Connected")
+    else:
+        st.error("❌ System Disconnected")
+
+# 2. Feature Cards
+def create_feature_card(icon, title, description):
+    st.markdown(f"""
+    <div style="background: white; padding: 1.5rem; border-radius: 10px;
+                border-left: 4px solid #FDB515;
+                box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);">
+        <h3 style="color: #003262;">{icon} {title}</h3>
+        <p style="color: #6C757D;">{description}</p>
+    </div>
+    """, unsafe_allow_html=True)
+
+# 3. Progress Indicator
+def show_progress(value, label):
+    st.markdown(f"""
+    <div style="margin-bottom: 1rem;">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+            <span style="color: #003262; font-weight: 600;">{label}</span>
+            <span style="color: #FDB515; font-weight: 600;">{value}%</span>
+        </div>
+        <div style="background: #E9ECEF; border-radius: 10px; height: 10px;">
+            <div style="background: linear-gradient(90deg, #FDB515, #FFC72C); 
+                        width: {value}%; height: 100%; border-radius: 10px;
+                        transition: width 0.3s ease;"></div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+# 4. Divider with Cal Colors
+def cal_divider():
+    st.markdown("""
+    <hr style="border: none; height: 3px; 
+               background: linear-gradient(90deg, #003262, #FDB515, #003262);
+               margin: 2rem 0;">
+    """, unsafe_allow_html=True)
+
+================================================================================
+COMPLETE APP TEMPLATE
+================================================================================
+
+import streamlit as st
+
+# Page config
+st.set_page_config(
+    page_title="Cal Colors App",
+    page_icon="🐻",
+    layout="wide",
+    initial_sidebar_state="expanded"
+)
+
+# Apply theme
+apply_cal_colors_theme()
+
+# Create header
+create_header()
+
+# Sidebar navigation
+page = create_sidebar_navigation()
+
+# Main content area
+if page == "🏠 Home":
+    st.markdown("## Welcome to Your Cal Colors Application")
+    
+    # Metrics row
+    col1, col2, col3, col4 = st.columns(4)
+    with col1:
+        create_metric_card("Total Users", "1,234", "+12%")
+    with col2:
+        create_metric_card("Active Sessions", "89", "+5%")
+    with col3:
+        create_metric_card("Performance", "98%", "+2%")
+    with col4:
+        create_metric_card("Uptime", "99.9%", "Stable")
+    
+    cal_divider()
+    
+    # Feature cards
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        create_feature_card("🚀", "Fast Processing", 
+                           "Lightning-fast data processing with optimized algorithms")
+    with col2:
+        create_feature_card("🔒", "Secure", 
+                           "Enterprise-grade security with encrypted connections")
+    with col3:
+        create_feature_card("📊", "Analytics", 
+                           "Comprehensive analytics and reporting tools")
+
+elif page == "📊 Analytics":
+    st.markdown("## Analytics Dashboard")
+    # Add analytics content here
+
+elif page == "📈 Visualizations":
+    st.markdown("## Data Visualizations")
+    # Add visualization content here
+
+elif page == "⚙️ Settings":
+    st.markdown("## Settings")
+    tabs = st.tabs(["General", "Advanced", "About"])
+    
+    with tabs[0]:
+        st.subheader("General Settings")
+        # Add settings here
+    
+    with tabs[1]:
+        st.subheader("Advanced Settings")
+        # Add advanced settings here
+    
+    with tabs[2]:
+        st.subheader("About")
+        create_info_card("Application Info", 
+                        "Version 1.0.0 | Cal Colors Theme | UC Berkeley")
+
+================================================================================
+PLOTLY CHART STYLING
+================================================================================
+
+import plotly.graph_objects as go
+
+# Cal Colors Plotly theme
+plotly_cal_colors = {
+    'layout': {
+        'plot_bgcolor': 'rgba(0,0,0,0)',
+        'paper_bgcolor': 'rgba(0,0,0,0)',
+        'font': {'color': '#003262'},
+        'title': {'font': {'color': '#003262', 'size': 20}},
+        'xaxis': {'gridcolor': '#E9ECEF', 'linecolor': '#003262'},
+        'yaxis': {'gridcolor': '#E9ECEF', 'linecolor': '#003262'},
+        'colorway': ['#003262', '#FDB515', '#3B7EA1', '#FFC72C', '#C4820E']
+    }
+}
+
+def create_cal_chart(data, chart_type='bar'):
+    """Create a Plotly chart with Cal Colors theme"""
+    fig = go.Figure()
+    
+    if chart_type == 'bar':
+        fig.add_trace(go.Bar(
+            x=data['x'],
+            y=data['y'],
+            marker_color='#003262',
+            marker_line_color='#FDB515',
+            marker_line_width=2
+        ))
+    
+    fig.update_layout(plotly_cal_colors['layout'])
+    return fig
+
+================================================================================
+USAGE NOTES
+================================================================================
+
+1. Color Usage Guidelines:
+   - Use Berkeley Blue (#003262) for primary actions and headers
+   - Use California Gold (#FDB515) for accents and highlights
+   - Maintain high contrast for accessibility (WCAG AA compliant)
+   - Use white backgrounds for content areas
+
+2. Typography:
+   - Headers: Bold, larger size, Berkeley Blue or white on blue background
+   - Body text: Regular weight, dark gray (#212529)
+   - Links: Berkeley Blue, underline on hover
+
+3. Spacing:
+   - Use consistent padding (1rem, 1.5rem, 2rem)
+   - Maintain visual hierarchy with appropriate margins
+   - Group related content with cards and containers
+
+4. Interactive Elements:
+   - Buttons should have hover states
+   - Forms should have clear focus indicators
+   - Use transitions for smooth interactions (0.3s ease)
+
+5. Responsive Design:
+   - Use Streamlit's column system for layouts
+   - Ensure mobile compatibility
+   - Test on different screen sizes
+
+================================================================================
+END OF DESIGN GUIDE
+================================================================================
