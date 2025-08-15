@@ -764,11 +764,11 @@ def init_session_state():
         if key not in st.session_state:
             st.session_state[key] = value
 
-init_session_state()
-
 # Main Application
 def main():
     """Enhanced main application"""
+    # Initialize session state first
+    init_session_state()
     
     # Header with Cal theme
     if ui_available:
