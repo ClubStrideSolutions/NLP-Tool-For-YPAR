@@ -42,7 +42,7 @@ pip-log.txt
 pip-delete-this-directory.txt
 
 # Streamlit
-.streamlit/
+.streamlit/secrets.toml
 *.log
 
 # Database

@@ -24,5 +24,4 @@ chardet>=5.0.0
 markdown>=3.4.0
 lxml>=4.9.0
 streamlit-aggrid>=0.3.4
-streamlit-option-menu>=0.3.6
 psutil>=5.9.0
