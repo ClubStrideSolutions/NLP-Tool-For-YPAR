@@ -108,28 +108,44 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Theme CSS
+# Dark Theme CSS
 THEME_CSS = """
 <style>
-    /* Professional Blue and Gold Theme */
+    /* Dark Theme with Blue and Gold Accents */
     :root {
-        --primary-color: #003262;
-        --secondary-color: #FDB515;
-        --text-primary: #333333;
-        --text-secondary: #666666;
-        --background: #FFFFFF;
-        --card-background: #F8F9FA;
-        --border-color: #E0E0E0;
+        --primary-color: #4A9EFF;  /* Bright blue for dark theme */
+        --secondary-color: #FFD700;  /* Gold accent */
+        --background-dark: #0E1117;  /* Main dark background */
+        --background-card: #1A1F2E;  /* Card background */
+        --background-hover: #2A2F3E;  /* Hover state */
+        --text-primary: #FFFFFF;  /* Primary text */
+        --text-secondary: #B8BCC8;  /* Secondary text */
+        --border-color: #2A2F3E;  /* Border color */
+        --success-color: #00D26A;  /* Success green */
+        --warning-color: #FFB800;  /* Warning yellow */
+        --error-color: #FF4444;  /* Error red */
+    }
+    
+    /* Force dark background */
+    .stApp {
+        background: var(--background-dark);
+        color: var(--text-primary);
     }
     
     /* Main container */
     .main {
         padding: 2rem;
-        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        background: linear-gradient(135deg, #0E1117 0%, #1A1F2E 100%);
+        color: var(--text-primary);
+    }
+    
+    /* All text elements */
+    p, span, label, .stMarkdown, .stText {
+        color: var(--text-primary) !important;
     }
     
     /* Headers */
-    h1, h2, h3 {
+    h1, h2, h3, h4, h5, h6 {
         color: var(--primary-color) !important;
         font-weight: 600 !important;
     }
@@ -138,89 +154,232 @@ THEME_CSS = """
         border-bottom: 3px solid var(--secondary-color);
         padding-bottom: 1rem;
         margin-bottom: 2rem;
+        text-shadow: 0 0 20px rgba(74, 158, 255, 0.3);
     }
     
     /* Sidebar */
-    .css-1d391kg {
-        background: linear-gradient(180deg, var(--primary-color) 0%, #004080 100%);
+    section[data-testid="stSidebar"] {
+        background: linear-gradient(180deg, #0E1117 0%, #1A1F2E 100%);
+        border-right: 1px solid var(--border-color);
     }
     
-    .css-1d391kg .sidebar-content {
-        background: rgba(255, 255, 255, 0.95);
-        border-radius: 10px;
-        padding: 1rem;
-        margin: 1rem;
+    section[data-testid="stSidebar"] .stButton > button {
+        background: var(--background-card);
+        border: 1px solid var(--border-color);
+        color: var(--text-primary);
     }
     
-    /* Cards */
+    section[data-testid="stSidebar"] .stButton > button:hover {
+        background: var(--background-hover);
+        border-color: var(--primary-color);
+        box-shadow: 0 0 10px rgba(74, 158, 255, 0.3);
+    }
+    
+    /* Cards and Expanders */
     .stExpander {
-        background: var(--card-background);
+        background: var(--background-card);
         border: 1px solid var(--border-color);
         border-radius: 10px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+    }
+    
+    .streamlit-expanderHeader {
+        background: var(--background-card);
+        color: var(--text-primary);
     }
     
     /* Buttons */
     .stButton > button {
-        background: linear-gradient(135deg, var(--primary-color) 0%, #004080 100%);
+        background: linear-gradient(135deg, var(--primary-color) 0%, #3A7ECC 100%);
         color: white;
         border: none;
-        border-radius: 5px;
-        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        padding: 0.6rem 1.2rem;
         font-weight: 500;
         transition: all 0.3s ease;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
     }
     
     .stButton > button:hover {
         background: linear-gradient(135deg, var(--secondary-color) 0%, #FFB800 100%);
-        box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+        box-shadow: 0 4px 12px rgba(255, 215, 0, 0.3);
         transform: translateY(-2px);
     }
     
-    /* Success/Info/Warning messages */
+    /* Primary button special styling */
+    .stButton > button[kind="primary"] {
+        background: linear-gradient(135deg, var(--secondary-color) 0%, #FFB800 100%);
+        color: #0E1117;
+        font-weight: 600;
+    }
+    
+    /* Input fields */
+    .stTextInput > div > div > input,
+    .stSelectbox > div > div > select,
+    .stTextArea > div > div > textarea {
+        background-color: var(--background-card);
+        color: var(--text-primary);
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+    }
+    
+    .stTextInput > div > div > input:focus,
+    .stSelectbox > div > div > select:focus,
+    .stTextArea > div > div > textarea:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 1px var(--primary-color);
+    }
+    
+    /* Success/Info/Warning/Error messages */
+    .stSuccess, .stInfo, .stWarning, .stError {
+        border-radius: 8px;
+        padding: 1rem;
+    }
+    
     .stSuccess {
-        background-color: #D4EDDA;
-        border-left: 4px solid var(--secondary-color);
-        color: var(--primary-color);
+        background-color: rgba(0, 210, 106, 0.1);
+        border-left: 4px solid var(--success-color);
+        color: var(--success-color);
     }
     
     .stInfo {
-        background-color: #D1ECF1;
+        background-color: rgba(74, 158, 255, 0.1);
         border-left: 4px solid var(--primary-color);
+        color: var(--primary-color);
     }
     
     .stWarning {
-        background-color: #FFF3CD;
-        border-left: 4px solid var(--secondary-color);
+        background-color: rgba(255, 184, 0, 0.1);
+        border-left: 4px solid var(--warning-color);
+        color: var(--warning-color);
+    }
+    
+    .stError {
+        background-color: rgba(255, 68, 68, 0.1);
+        border-left: 4px solid var(--error-color);
+        color: var(--error-color);
     }
     
     /* Metrics */
     [data-testid="metric-container"] {
-        background: var(--card-background);
+        background: var(--background-card);
         border: 1px solid var(--border-color);
         padding: 1rem;
         border-radius: 10px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    }
+    
+    [data-testid="metric-container"] [data-testid="metric-value"] {
+        color: var(--primary-color);
     }
     
     /* File uploader */
     .stFileUpload {
-        background: var(--card-background);
+        background: var(--background-card);
         border: 2px dashed var(--primary-color);
         border-radius: 10px;
         padding: 2rem;
     }
     
+    .stFileUpload:hover {
+        border-color: var(--secondary-color);
+        background: var(--background-hover);
+    }
+    
     /* Tables */
     .stDataFrame {
-        background: white;
+        background: var(--background-card);
         border-radius: 10px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    }
+    
+    .stDataFrame table {
+        color: var(--text-primary);
+    }
+    
+    .stDataFrame thead tr th {
+        background: var(--background-hover);
+        color: var(--primary-color);
+    }
+    
+    .stDataFrame tbody tr:hover {
+        background: var(--background-hover);
     }
     
     /* Progress bar */
     .stProgress > div > div {
         background: linear-gradient(90deg, var(--secondary-color) 0%, var(--primary-color) 100%);
+    }
+    
+    /* Code blocks */
+    .stCodeBlock {
+        background: var(--background-card);
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+    }
+    
+    /* Download buttons */
+    .stDownloadButton > button {
+        background: linear-gradient(135deg, var(--success-color) 0%, #00A050 100%);
+        color: white;
+    }
+    
+    .stDownloadButton > button:hover {
+        background: linear-gradient(135deg, var(--secondary-color) 0%, #FFB800 100%);
+    }
+    
+    /* Tabs */
+    .stTabs [data-baseweb="tab-list"] {
+        background-color: var(--background-card);
+        border-radius: 8px;
+    }
+    
+    .stTabs [data-baseweb="tab"] {
+        color: var(--text-secondary);
+    }
+    
+    .stTabs [aria-selected="true"] {
+        background-color: var(--background-hover);
+        color: var(--primary-color);
+    }
+    
+    /* Plotly charts dark theme */
+    .js-plotly-plot .plotly {
+        background: var(--background-card) !important;
+    }
+    
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+        width: 10px;
+        height: 10px;
+    }
+    
+    ::-webkit-scrollbar-track {
+        background: var(--background-dark);
+    }
+    
+    ::-webkit-scrollbar-thumb {
+        background: var(--border-color);
+        border-radius: 5px;
+    }
+    
+    ::-webkit-scrollbar-thumb:hover {
+        background: var(--primary-color);
+    }
+    
+    /* Make all containers dark */
+    div[data-testid="stVerticalBlock"] > div {
+        background-color: transparent;
+    }
+    
+    /* Column containers */
+    .row-widget.stHorizontal {
+        background: transparent;
+    }
+    
+    /* Make sure text in all elements is visible */
+    * {
+        color: var(--text-primary);
     }
 </style>
 """
@@ -1090,7 +1249,7 @@ class Visualizer:
             wordcloud = WordCloud(
                 width=1600,  # Higher resolution
                 height=800,   # Higher resolution
-                background_color='white',
+                background_color='#0E1117',  # Dark background to match theme
                 colormap='viridis',  # Better color scheme
                 max_words=100,  # More words
                 relative_scaling=0.5,  # Better word sizing
@@ -1112,17 +1271,17 @@ class Visualizer:
             from PIL import Image
             import numpy as np
             
-            # Create matplotlib figure
+            # Create matplotlib figure with dark theme
             fig_mpl, ax = plt.subplots(figsize=(16, 8), dpi=100)
             ax.imshow(wordcloud, interpolation='bilinear')
             ax.axis('off')
-            ax.set_facecolor('white')
-            fig_mpl.patch.set_facecolor('white')
+            ax.set_facecolor('#0E1117')
+            fig_mpl.patch.set_facecolor('#0E1117')
             plt.tight_layout(pad=0)
             
             # Convert to image
             buf = io.BytesIO()
-            plt.savefig(buf, format='png', dpi=150, bbox_inches='tight', pad_inches=0.1, facecolor='white')
+            plt.savefig(buf, format='png', dpi=150, bbox_inches='tight', pad_inches=0.1, facecolor='#0E1117')
             buf.seek(0)
             plt.close(fig_mpl)
             
@@ -1145,8 +1304,8 @@ class Visualizer:
                 yaxis=dict(showticklabels=False, showgrid=False, zeroline=False, visible=False),
                 height=500,
                 margin=dict(t=50, b=0, l=0, r=0),
-                paper_bgcolor='white',
-                plot_bgcolor='white',
+                paper_bgcolor='#0E1117',
+                plot_bgcolor='#0E1117',
                 hoverlabel=dict(bgcolor="white", font_size=14, font_family="Arial")
             )
             
@@ -1197,8 +1356,12 @@ class Visualizer:
             title="Sentiment Trend",
             xaxis_title="Segment",
             yaxis_title="Sentiment Score",
-            yaxis=dict(range=[-1, 1]),
-            height=350
+            yaxis=dict(range=[-1, 1], gridcolor='#2A2F3E'),
+            xaxis=dict(gridcolor='#2A2F3E'),
+            height=350,
+            paper_bgcolor='#0E1117',
+            plot_bgcolor='#1A1F2E',
+            font=dict(color='#FFFFFF')
         )
         return fig
     
@@ -1357,8 +1520,10 @@ class Visualizer:
                 hovermode='closest',
                 xaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
                 yaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
-                plot_bgcolor='white',
+                plot_bgcolor='#1A1F2E',
+                paper_bgcolor='#0E1117',
                 height=600,
+                font=dict(color='#FFFFFF'),
                 legend=dict(
                     orientation="h",
                     yanchor="bottom",
