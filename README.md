@@ -23,7 +23,7 @@ A powerful, AI-enhanced text analysis platform designed for Youth Participatory 
 - Interactive Q&A
 
 ### 🎨 Professional UI
-- UC Berkeley Cal Colors theme (Berkeley Blue #003262, California Gold #FDB515)
+- Professional Blue (#003262) and Gold (#FDB515) theme
 - Responsive design with intuitive navigation
 - Real-time analysis status indicators
 - Rich visualizations and interactive charts
@@ -178,7 +178,7 @@ This project is licensed under the MIT License.
 
 ## 🙏 Acknowledgments
 
-- UC Berkeley for design inspiration
+- Professional design community for inspiration
 - OpenAI for GPT models
 - Streamlit for the framework
 - Youth Participatory Action Research community

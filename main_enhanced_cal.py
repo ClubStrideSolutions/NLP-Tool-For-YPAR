@@ -101,32 +101,103 @@ def safe_session_state_get(key, default=None):
 # if ui_available:
 #     UIComponents.apply_berkeley_theme()
 
-# Apply Cal colors theme
+# Apply theme colors
 st.markdown("""
 <style>
+    /* Main app background */
     .stApp {
-        background: linear-gradient(180deg, #001a33 0%, #003262 100%);
+        background: linear-gradient(180deg, #f8f9fa 0%, #ffffff 100%);
     }
+    
+    /* Content container */
     .main .block-container {
-        background-color: rgba(0, 50, 98, 0.95);
+        background-color: #ffffff;
         padding: 2rem;
         border-radius: 10px;
-        color: #ffffff;
     }
+    
+    /* Headers with gold color */
     h1, h2, h3 {
-        color: #FDB515 !important;
-        text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        color: #003262 !important;
+        font-weight: 600;
     }
+    
+    /* Primary buttons with blue background */
     .stButton > button {
-        background: linear-gradient(135deg, #FDB515 0%, #C4820E 100%);
-        color: #003262;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 1px;
+        background: linear-gradient(135deg, #003262 0%, #004d8a 100%);
+        color: #ffffff;
+        font-weight: 600;
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: 5px;
     }
+    
     .stButton > button:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 12px rgba(253, 181, 21, 0.4);
+        background: linear-gradient(135deg, #004d8a 0%, #003262 100%);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(0, 50, 98, 0.3);
+    }
+    
+    /* Sidebar styling */
+    .css-1d391kg, [data-testid="stSidebar"] {
+        background: linear-gradient(180deg, #003262 0%, #004d8a 100%);
+    }
+    
+    /* Sidebar text */
+    [data-testid="stSidebar"] * {
+        color: #ffffff !important;
+    }
+    
+    /* Metrics styling */
+    [data-testid="metric-container"] {
+        background: linear-gradient(135deg, #003262 0%, #004d8a 100%);
+        padding: 1rem;
+        border-radius: 8px;
+        border: 2px solid #FDB515;
+    }
+    
+    [data-testid="metric-container"] label {
+        color: #FDB515 !important;
+    }
+    
+    [data-testid="metric-container"] [data-testid="metric-value"] {
+        color: #ffffff !important;
+    }
+    
+    /* Success/Info/Warning boxes */
+    .stAlert {
+        border-radius: 5px;
+        border-left: 4px solid #FDB515;
+    }
+    
+    /* Text input fields */
+    .stTextInput > div > div > input {
+        border: 2px solid #003262;
+        border-radius: 5px;
+    }
+    
+    .stTextInput > div > div > input:focus {
+        border-color: #FDB515;
+        box-shadow: 0 0 0 2px rgba(253, 181, 21, 0.2);
+    }
+    
+    /* Radio buttons */
+    .stRadio > div {
+        background-color: rgba(255, 255, 255, 0.9);
+        padding: 0.5rem;
+        border-radius: 5px;
+    }
+    
+    /* File uploader */
+    [data-testid="stFileUploadDropzone"] {
+        background: linear-gradient(135deg, rgba(0, 50, 98, 0.05), rgba(253, 181, 21, 0.05));
+        border: 2px dashed #003262;
+        border-radius: 8px;
+    }
+    
+    [data-testid="stFileUploadDropzone"]:hover {
+        border-color: #FDB515;
+        background: linear-gradient(135deg, rgba(253, 181, 21, 0.1), rgba(0, 50, 98, 0.1));
     }
     </style>
     """, unsafe_allow_html=True)
@@ -148,7 +219,7 @@ except:
 class Config:
     """Application configuration"""
     
-    # Cal Colors
+    # Theme Colors
     BERKELEY_BLUE = "#003262"
     CALIFORNIA_GOLD = "#FDB515"
     FOUNDERS_ROCK = "#3B7EA1"
@@ -770,7 +841,7 @@ def main():
     # Initialize session state first
     init_session_state()
     
-    # Header with Cal theme
+    # Header with theme colors
     if ui_available:
         UIComponents.render_modern_header()
     else:
@@ -779,13 +850,13 @@ def main():
             🔬 NLP Tool for YPAR
         </h1>
         <p style='text-align: center; color: #ffffff; font-size: 1.2em;'>
-            Advanced Text Analysis with Cal Excellence
+            Advanced Text Analysis Platform
         </p>
         """, unsafe_allow_html=True)
     
     # Enhanced navigation with better styling
     with st.sidebar:
-        # Cal themed header
+        # Themed header
         st.markdown("""
         <div style="text-align: center; padding: 20px 0;">
             <h2 style="color: #FDB515; margin: 0;">🔬 NLP YPAR Tool</h2>
@@ -2271,13 +2342,16 @@ def show_settings():
         col1, col2 = st.columns([3, 1])
         
         with col1:
-            # Get current connection string from session state or config
-            current_mongo_conn = st.session_state.get('mongodb_connection_string', 
-                                                      Config.get_mongodb_connection_string() or '')
+            # Don't show existing connection string for security
+            current_mongo_conn = st.session_state.get('mongodb_connection_string', '')
+            has_mongo = bool(current_mongo_conn or Config.get_mongodb_connection_string())
+            
+            if has_mongo:
+                st.info("✅ MongoDB is configured")
             
             mongo_conn = st.text_input(
                 "MongoDB Connection String",
-                value=current_mongo_conn,
+                value="",
                 type="password",
                 placeholder="mongodb://username:password@host:port/database",
                 help="Enter your MongoDB connection string. Format: mongodb://[username:password@]host[:port][/database]"
@@ -2301,12 +2375,16 @@ def show_settings():
         col1, col2 = st.columns([3, 1])
         
         with col1:
-            # Get current API key from session state
+            # Don't show existing API key for security
             current_openai_key = st.session_state.get('openai_api_key', '')
+            has_openai = bool(current_openai_key)
+            
+            if has_openai:
+                st.info("✅ OpenAI is configured")
             
             openai_key = st.text_input(
                 "OpenAI API Key",
-                value=current_openai_key,
+                value="",
                 type="password",
                 placeholder="sk-...",
                 help="Enter your OpenAI API key for advanced AI features"
