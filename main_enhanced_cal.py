@@ -850,20 +850,15 @@ def main():
         show_upload()
     elif selected == "Text Analysis":
         show_analysis()
-    elif selected == "Theme Modeling":
-        show_themes()
-    elif selected == "Quote Extraction":
-        show_quotes()
-    elif selected == "Insights":
-        show_insights()
     elif selected == "Visualizations":
         show_visualizations()
     elif selected == "RAG Analysis":
         show_rag_analysis()
-    elif selected == "Analysis History":
-        show_analysis_history()
     elif selected == "Settings":
         show_settings()
+    else:
+        # Default to home if no match
+        show_home()
 
 def show_home():
     """Enhanced home page"""
