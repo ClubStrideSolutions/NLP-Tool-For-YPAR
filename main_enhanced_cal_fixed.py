@@ -311,12 +311,20 @@ class EnhancedDatabaseManager:
     """Database manager with automatic fallback to session state"""
     
     def __init__(self):
+        # Always initialize attributes to avoid AttributeError
         self.client = None
         self.db = None
         self.connected = False
         self.cache = {}
+        # Only try to connect if pymongo is available
         if PYMONGO_AVAILABLE:
-            self._connect()
+            try:
+                self._connect()
+            except Exception as e:
+                logger.warning(f"Database initialization failed: {e}")
+                self.connected = False
+                self.client = None
+                self.db = None
     
     def _connect(self):
         """Establish database connection with proper error handling"""
@@ -343,7 +351,7 @@ class EnhancedDatabaseManager:
         self.cache[cache_key] = results
         
         # Try MongoDB first if connected
-        if self.connected and self.db:
+        if getattr(self, 'connected', False) and getattr(self, 'db', None):
             try:
                 collection = self.db["analysis_results"]
                 document = {
@@ -389,7 +397,7 @@ class EnhancedDatabaseManager:
                     return result['results']
         
         # Try MongoDB if connected
-        if self.connected and self.db:
+        if getattr(self, 'connected', False) and getattr(self, 'db', None):
             try:
                 collection = self.db["analysis_results"]
                 result = collection.find_one({
@@ -413,7 +421,7 @@ class EnhancedDatabaseManager:
             results.extend(st.session_state.analysis_results)
         
         # Try MongoDB if connected
-        if self.connected and self.db:
+        if getattr(self, 'connected', False) and getattr(self, 'db', None):
             try:
                 collection = self.db["analysis_results"]
                 mongo_results = list(collection.find().sort("timestamp", -1).limit(100))

@@ -10,7 +10,8 @@
       "Bash(streamlit run:*)",
       "Bash(rm:*)",
       "Bash(python:*)",
-      "Bash(mv:*)"
+      "Bash(mv:*)",
+      "Bash(timeout:*)"
     ],
     "deny": [],
     "ask": [],
