@@ -1451,13 +1451,19 @@ def init_session_state():
         st.session_state.conversation_history = []
     if 'page' not in st.session_state:
         st.session_state.page = "Home"
+    if 'current_question' not in st.session_state:
+        st.session_state.current_question = ""
 
 def show_home():
     """Display home page"""
     st.markdown(THEME_CSS, unsafe_allow_html=True)
     
     st.title("🔬 NLP Tool for Youth Participatory Action Research")
-    st.markdown("### Empowering Youth Researchers with Advanced Text Analysis")
+    st.markdown("### Empowering Young Researchers to Analyze Text Like Pros! 🚀")
+    
+    # Welcome message
+    st.info("""👋 **Welcome!** This tool helps you analyze text documents for your research projects. 
+    No coding required - just upload your files and click analyze!""")
     
     col1, col2, col3 = st.columns(3)
     
@@ -1477,52 +1483,94 @@ def show_home():
     
     st.markdown("---")
     
-    st.markdown("### 🚀 Quick Start")
+    st.markdown("### 🚀 Quick Start Guide")
     
     col1, col2 = st.columns(2)
     
     with col1:
         st.markdown("""
-        **Getting Started:**
-        1. 📁 Upload your documents
-        2. 📊 Run comprehensive analysis
-        3. 🎯 Extract themes and insights
-        4. 💾 Export results
+        **🎯 How to Use (Super Easy!):**
+        1. 📁 **Upload** - Drop your files (PDFs, Word docs, etc.)
+        2. 🔍 **Analyze** - Click the big blue analyze button
+        3. 📊 **Review** - Check out your results
+        4. 💾 **Download** - Save your analysis
         
-        **Available Analyses:**
-        - Sentiment Analysis
-        - Theme Extraction
-        - Keyword Identification
-        - Named Entity Recognition
-        - Quote Extraction
-        - Research Insights
+        **🧪 What We Analyze:**
+        - 😊 **Feelings** - Is the text positive or negative?
+        - 🎯 **Main Ideas** - What's it really about?
+        - 🔑 **Keywords** - Most important words
+        - 👥 **People & Places** - Who and where?
+        - 💬 **Best Quotes** - Key statements
+        - 💡 **Insights** - What does it all mean?
         """)
     
     with col2:
         st.markdown("""
-        **Features:**
-        - ✨ Dual-mode analysis (AI + Traditional)
-        - 🔄 Automatic fallback systems
-        - 📈 Rich visualizations
-        - 💬 Interactive Q&A
-        - 📊 Batch processing
-        - 🔒 Secure data handling
+        **✨ Cool Features:**
+        - 🤖 **Smart AI** - Uses ChatGPT (when available)
+        - 📊 **Visual Results** - Colorful charts & networks
+        - 💬 **Ask Questions** - Chat with your document
+        - 🎨 **Word Clouds** - See your text as art
+        - 📱 **Mobile Friendly** - Works on phones too!
+        - 🔒 **Private & Safe** - Your data stays yours
         
-        **File Formats:**
-        - PDF, DOCX, TXT, MD
+        **📄 Works With:**
+        - PDF files 📕
+        - Word documents 📝
+        - Text files 📄
+        - Markdown files 📋
+        """)
+    
+    # Video tutorial placeholder
+    st.markdown("---")
+    st.markdown("### 🎥 Need Help?")
+    with st.expander("👀 Watch Quick Tutorial (2 min)"):
+        st.markdown("""
+        **Step-by-Step Guide:**
+        
+        1️⃣ **Upload Your File**
+        - Click 'Upload Data' in the menu
+        - Drag and drop your file or click 'Browse'
+        - Wait for the green checkmark ✅
+        
+        2️⃣ **Run Analysis**
+        - Go to 'Text Analysis'
+        - Select your file from the dropdown
+        - Click '🎯 Run Complete Analysis'
+        - Watch the progress bar fill up!
+        
+        3️⃣ **Explore Results**
+        - Scroll through all the findings
+        - Click on different sections to expand
+        - Check out the network visualization!
+        
+        4️⃣ **Download Results**
+        - Click the download button at the bottom
+        - Choose format (PDF, TXT, or JSON)
+        - Save to your computer!
+        
+        💡 **Pro Tip:** Try asking questions about your document in the Q&A box!
         """)
 
 def show_upload():
     """Display file upload page"""
-    st.title("📁 Upload Documents")
+    st.title("📁 Upload Your Documents")
     
+    # Friendly instructions
     st.markdown("""
-    Upload your documents for analysis. Supported formats:
-    - **PDF** - Research papers, reports
-    - **DOCX** - Word documents
-    - **TXT** - Plain text files
-    - **MD** - Markdown files
+    ### 📤 Drop Your Files Here!
+    
+    **What can you upload?**
+    - 📕 **PDF** - Research papers, articles, reports
+    - 📝 **Word Docs** - Essays, assignments, notes
+    - 📄 **Text Files** - Plain text, transcripts
+    - 📋 **Markdown** - README files, notes
+    
+    🎯 **Tip:** You can upload multiple files at once!
     """)
+    
+    # Add helper message
+    st.info("💡 **First time?** Just drag your file into the box below or click 'Browse files'")
     
     uploaded_files = st.file_uploader(
         "Choose files",
@@ -1578,7 +1626,8 @@ def show_upload():
 
 def show_analysis():
     """Display text analysis page"""
-    st.title("📊 Text Analysis")
+    st.title("📊 Text Analysis Lab")
+    st.markdown("🧪 **Let's analyze your text!** Choose what you want to discover.")
     
     if not st.session_state.uploaded_files:
         st.warning("Please upload documents first")
@@ -1608,8 +1657,9 @@ def show_analysis():
         col1, col2 = st.columns(2)
         
         with col1:
-            if st.button("🎯 Run Complete Analysis", type="primary", use_container_width=True):
-                with st.spinner("Running comprehensive analysis..."):
+            if st.button("🎯 Run Complete Analysis (Recommended!)", type="primary", use_container_width=True):
+                st.balloons()  # Fun celebration
+                with st.spinner("🔬 Analyzing your text... This is gonna be awesome!"):
                     progress = st.progress(0)
                     
                     progress.progress(0.15)
@@ -1703,9 +1753,126 @@ def show_analysis():
                     
                     st.markdown("---")
                     st.success("✅ Analysis complete!")
+                    
+                    # Add download button for results
+                    st.markdown("### 💾 Save Your Results")
+                    col1, col2, col3 = st.columns(3)
+                    
+                    with col1:
+                        # Create text version of results
+                        results_text = f"""NLP Analysis Results
+{'='*50}
+Document: {file_info['name']}
+Analyzed: {datetime.now().strftime('%Y-%m-%d %H:%M')}
+{'='*50}
+
+SENTIMENT ANALYSIS
+{'-'*30}
+{sentiment}
+
+MAIN THEMES
+{'-'*30}
+{themes}
+
+KEYWORDS
+{'-'*30}
+{keywords}
+
+NAMED ENTITIES
+{'-'*30}
+{entities}
+
+KEY QUOTES
+{'-'*30}
+{quotes}
+
+RESEARCH INSIGHTS
+{'-'*30}
+{insights}
+
+TOPICS & CATEGORIES
+{'-'*30}
+Topics: {', '.join(topics_data.get('topics', [])[:5])}
+Categories: {', '.join(topics_data.get('categories', []))}
+Concepts: {', '.join(topics_data.get('concepts', [])[:10])}
+"""
+                        st.download_button(
+                            label="📄 Download as Text",
+                            data=results_text,
+                            file_name=f"analysis_{file_info['name'].split('.')[0]}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt",
+                            mime="text/plain",
+                            use_container_width=True
+                        )
+                    
+                    with col2:
+                        # Create JSON version
+                        results_json = json.dumps({
+                            "document": file_info['name'],
+                            "analyzed": datetime.now().isoformat(),
+                            "sentiment": sentiment,
+                            "themes": themes,
+                            "keywords": keywords,
+                            "entities": entities,
+                            "quotes": quotes,
+                            "insights": insights,
+                            "topics": topics_data.get('topics', []),
+                            "categories": topics_data.get('categories', []),
+                            "concepts": topics_data.get('concepts', [])
+                        }, indent=2)
+                        
+                        st.download_button(
+                            label="📊 Download as JSON",
+                            data=results_json,
+                            file_name=f"analysis_{file_info['name'].split('.')[0]}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json",
+                            mime="application/json",
+                            use_container_width=True
+                        )
+                    
+                    with col3:
+                        # Create markdown version
+                        results_md = f"""# NLP Analysis Results
+
+## Document: {file_info['name']}
+**Analyzed:** {datetime.now().strftime('%Y-%m-%d %H:%M')}
+
+---
+
+## Sentiment Analysis
+{sentiment}
+
+## Main Themes
+{themes}
+
+## Keywords
+{keywords}
+
+## Named Entities
+{entities}
+
+## Key Quotes
+{quotes}
+
+## Research Insights
+{insights}
+
+## Topics & Categories
+**Topics:** {', '.join(topics_data.get('topics', [])[:5])}
+
+**Categories:** {', '.join(topics_data.get('categories', []))}
+
+**Concepts:** {', '.join(topics_data.get('concepts', [])[:10])}
+"""
+                        st.download_button(
+                            label="📝 Download as Markdown",
+                            data=results_md,
+                            file_name=f"analysis_{file_info['name'].split('.')[0]}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.md",
+                            mime="text/markdown",
+                            use_container_width=True
+                        )
         
         with col2:
-            st.markdown("**Run Individual Analysis:**")
+            st.markdown("**🎨 Or Pick What You Want:**")
+            st.caption("Choose specific analyses below")
             
             if st.button("😊 Sentiment", use_container_width=True):
                 with st.spinner("Analyzing sentiment..."):
@@ -1769,9 +1936,29 @@ def show_analysis():
                     st.plotly_chart(network_fig, use_container_width=True)
         
         st.markdown("---")
-        st.markdown("### 💬 Ask Questions About This Document")
+        st.markdown("### 💬 Chat With Your Document")
+        st.markdown("🤔 **Curious about something?** Ask me anything about this text!")
         
-        question = st.text_input("Enter your question:")
+        # Add example questions
+        example_questions = [
+            "What is the main argument?",
+            "Who are the key people mentioned?",
+            "What evidence is presented?",
+            "What are the conclusions?",
+            "Is there any bias?"
+        ]
+        
+        col1, col2, col3, col4, col5 = st.columns(5)
+        for i, (col, q) in enumerate(zip([col1, col2, col3, col4, col5], example_questions)):
+            with col:
+                if st.button(f"💭 {q}", key=f"example_q_{i}", use_container_width=True):
+                    st.session_state.current_question = q
+        
+        question = st.text_input(
+            "Your question:",
+            value=st.session_state.get('current_question', ''),
+            placeholder="Type your question here or click an example above..."
+        )
         
         if question:
             with st.spinner("Finding answer..."):
@@ -1781,7 +1968,8 @@ def show_analysis():
 
 def show_visualizations():
     """Display visualizations page"""
-    st.title("📈 Visualizations")
+    st.title("📈 Visual Analytics Studio")
+    st.markdown("🎨 **See your text come to life!** Interactive charts and graphics.")
     
     if not st.session_state.uploaded_files:
         st.warning("Please upload and analyze documents first")
@@ -1877,7 +2065,8 @@ def show_visualizations():
 
 def show_history():
     """Display analysis history"""
-    st.title("📜 Analysis History")
+    st.title("📜 Your Analysis History")
+    st.markdown("📚 **Past analyses** - Review what you've discovered!")
     
     analyses = db_manager.get_all_analyses()
     
@@ -1906,9 +2095,20 @@ def show_history():
 
 def show_settings():
     """Display settings page"""
-    st.title("⚙️ Settings")
+    st.title("⚙️ Settings & Power-Ups")
     
-    st.markdown("Configure your analysis environment")
+    st.markdown("🔧 **Customize your experience** - Add superpowers to your analysis!")
+    
+    # Add friendly explanation
+    with st.expander("❓ What are these settings?"):
+        st.markdown("""
+        **🤖 OpenAI API Key**: Unlocks ChatGPT for smarter analysis
+        - Makes analysis more accurate
+        - Enables better question answering
+        - Free tier available at openai.com
+        
+        **Without API Key**: Tool still works great with traditional methods!
+        """)
     
     st.markdown("### 🔑 API Configuration")
     
@@ -1968,6 +2168,7 @@ def main():
     
     with st.sidebar:
         st.markdown("## 🔬 YPAR Tool")
+        st.markdown("*Your Research Assistant*")
         st.markdown("---")
         
         pages = {
@@ -1990,8 +2191,21 @@ def main():
         st.metric("Analyses", len(st.session_state.get('analysis_results', [])))
         
         st.markdown("---")
-        mode = "AI Enhanced" if Config.is_ai_enabled() else "Traditional NLP"
-        st.info(f"Mode: {mode}")
+        mode = "🤖 AI Mode" if Config.is_ai_enabled() else "📊 Classic Mode"
+        st.info(f"{mode}")
+        
+        # Add tips
+        st.markdown("---")
+        st.markdown("### 💡 Daily Tip")
+        tips = [
+            "Upload multiple files to compare them!",
+            "Try the network visualization for connections!",
+            "Ask specific questions for better answers!",
+            "Download your results to share with your team!",
+            "Use keywords to find patterns in your text!"
+        ]
+        import random
+        st.success(f"💡 {random.choice(tips)}")
     
     if st.session_state.page == "Home":
         show_home()
