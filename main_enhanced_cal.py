@@ -202,18 +202,37 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
-# Initialize NLTK
-try:
-    if stability_available:
-        safe_nltk_download()
-    else:
-        for package in ['punkt', 'stopwords', 'vader_lexicon', 'maxent_ne_chunker', 'words', 'averaged_perceptron_tagger']:
+# Initialize NLTK with proper error handling
+def initialize_nltk():
+    """Download required NLTK data packages"""
+    required_packages = [
+        'punkt',  # For sentence tokenization
+        'punkt_tab',  # New punkt format
+        'stopwords',  # For stopword removal
+        'vader_lexicon',  # For sentiment analysis
+        'maxent_ne_chunker',  # For named entity recognition
+        'words',  # Word corpus
+        'averaged_perceptron_tagger'  # For POS tagging
+    ]
+    
+    for package in required_packages:
+        try:
+            nltk.data.find(f'tokenizers/{package}')
+        except LookupError:
             try:
-                nltk.data.find(package)
-            except LookupError:
                 nltk.download(package, quiet=True)
-except:
-    pass
+            except:
+                # Try alternative download method
+                try:
+                    nltk.download(package.replace('_tab', ''), quiet=True)
+                except:
+                    pass
+
+# Run NLTK initialization
+try:
+    initialize_nltk()
+except Exception as e:
+    logger.warning(f"NLTK initialization warning: {e}")
 
 # Configuration
 class Config:
@@ -678,7 +697,11 @@ class EnhancedTextAnalyzer:
                 return "⚠️ Insufficient text for analysis. Please provide a longer document."
             
             # Create documents for better LDA performance
-            sentences = sent_tokenize(text)
+            try:
+                sentences = sent_tokenize(text)
+            except:
+                # Fallback to simple splitting
+                sentences = text.split('. ')
             docs = [s for s in sentences if len(s.split()) > 5]
             
             # If not enough sentences, create chunks
@@ -1096,7 +1119,12 @@ def show_upload():
                     with col3:
                         st.metric("Characters", metadata.get('char_count', 0))
                     with col4:
-                        st.metric("Sentences", len(sent_tokenize(content[:5000])))
+                        try:
+                            sentence_count = len(sent_tokenize(content[:5000]))
+                        except:
+                            # Fallback to simple sentence counting
+                            sentence_count = content.count('.') + content.count('!') + content.count('?')
+                        st.metric("Sentences", sentence_count)
                     
                     # Document preview section
                     st.markdown("---")
@@ -1733,7 +1761,11 @@ def show_quotes():
         
         if st.button("📝 Extract Quotes", type="primary"):
             with st.spinner("Extracting quotes..."):
-                sentences = sent_tokenize(text)[:100]
+                try:
+                    sentences = sent_tokenize(text)[:100]
+                except:
+                    # Fallback to simple splitting
+                    sentences = text.split('. ')[:100]
                 quotes = []
                 
                 for sent in sentences:
