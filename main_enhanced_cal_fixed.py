@@ -39,12 +39,26 @@ import yake
 import logging
 
 # Optional imports with fallback
-try:
-    from pymongo import MongoClient
-    PYMONGO_AVAILABLE = True
-except ImportError:
+# Check if MongoDB should be disabled entirely
+if os.environ.get('DISABLE_MONGODB', '').lower() == 'true':
     PYMONGO_AVAILABLE = False
     MongoClient = None
+else:
+    try:
+        from pymongo import MongoClient
+        # Test if pymongo actually works (some cloud environments have issues)
+        try:
+            test_client = MongoClient('mongodb://localhost:27017/', serverSelectionTimeoutMS=1)
+            test_client.close()
+        except:
+            # pymongo is installed but not working properly
+            PYMONGO_AVAILABLE = False
+            MongoClient = None
+        else:
+            PYMONGO_AVAILABLE = True
+    except (ImportError, NotImplementedError, Exception) as e:
+        PYMONGO_AVAILABLE = False
+        MongoClient = None
 
 try:
     import openai
@@ -103,7 +117,7 @@ except ImportError:
     psutil = None
 
 # Setup logging
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
 # ===================== CONFIGURATION =====================
@@ -316,11 +330,11 @@ class EnhancedDatabaseManager:
         self.db = None
         self.connected = False
         self.cache = {}
-        # Only try to connect if pymongo is available
+        # Only try to connect if pymongo is truly available and working
         if PYMONGO_AVAILABLE:
             try:
                 self._connect()
-            except Exception as e:
+            except (NotImplementedError, Exception) as e:
                 logger.warning(f"Database initialization failed: {e}")
                 self.connected = False
                 self.client = None
@@ -330,14 +344,14 @@ class EnhancedDatabaseManager:
         """Establish database connection with proper error handling"""
         try:
             connection_string = Config.get_mongodb_connection_string()
-            if connection_string and PYMONGO_AVAILABLE:
+            if connection_string and PYMONGO_AVAILABLE and MongoClient:
                 self.client = MongoClient(connection_string, serverSelectionTimeoutMS=5000)
                 # Test connection
                 self.client.server_info()
                 self.db = self.client["nlp_tool"]
                 self.connected = True
                 logger.info("MongoDB connected successfully")
-        except Exception as e:
+        except (NotImplementedError, Exception) as e:
             logger.warning(f"MongoDB connection failed, using session state: {e}")
             self.connected = False
             self.client = None
@@ -364,8 +378,9 @@ class EnhancedDatabaseManager:
                 }
                 result = collection.insert_one(document)
                 return str(result.inserted_id)
-            except Exception as e:
+            except (NotImplementedError, Exception) as e:
                 logger.error(f"MongoDB storage failed, falling back to session state: {e}")
+                self.connected = False  # Disable further MongoDB attempts
         
         # Fallback to session state (always works)
         if 'analysis_results' not in st.session_state:
@@ -407,8 +422,9 @@ class EnhancedDatabaseManager:
                 if result:
                     self.cache[cache_key] = result['results']
                     return result['results']
-            except Exception as e:
+            except (NotImplementedError, Exception) as e:
                 logger.error(f"Error retrieving from MongoDB: {e}")
+                self.connected = False  # Disable further MongoDB attempts
         
         return None
     
@@ -429,8 +445,9 @@ class EnhancedDatabaseManager:
                 for r in mongo_results:
                     r['_id'] = str(r['_id'])
                 results.extend(mongo_results)
-            except Exception as e:
+            except (NotImplementedError, Exception) as e:
                 logger.error(f"Error retrieving from MongoDB: {e}")
+                self.connected = False  # Disable further MongoDB attempts
         
         # Remove duplicates based on file_id and analysis_type
         seen = set()
