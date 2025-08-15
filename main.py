@@ -2,8 +2,8 @@
 Streamlit Cloud entry point for NLP YPAR Tool
 """
 
-# Import the main module
-import main_enhanced_cal
+# Import the fixed main module
+import main_enhanced_cal_fixed
 
 # Always run the main function (Streamlit Cloud doesn't use __main__)
-main_enhanced_cal.main()
+main_enhanced_cal_fixed.main()
