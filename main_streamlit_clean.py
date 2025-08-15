@@ -1181,31 +1181,45 @@ def show_analysis():
                     
                     progress.progress(1.0)
                     
-                    st.markdown("### 📋 Analysis Results")
+                    st.markdown("### 📋 Complete Analysis Results")
                     
-                    col1, col2, col3 = st.columns(3)
-                    
-                    with col1:
-                        st.markdown("#### 😊 Sentiment")
+                    # Sentiment Analysis - Full Width
+                    st.markdown("---")
+                    st.markdown("#### 😊 Sentiment Analysis")
+                    with st.container():
                         st.markdown(sentiment)
-                        
-                        st.markdown("#### 🏷️ Entities")
+                    
+                    # Themes - Full Width
+                    st.markdown("---")
+                    st.markdown("#### 🎯 Main Themes")
+                    with st.container():
+                        st.markdown(themes)
+                    
+                    # Keywords - Full Width
+                    st.markdown("---")
+                    st.markdown("#### 🔑 Key Terms & Keywords")
+                    with st.container():
+                        st.markdown(keywords)
+                    
+                    # Named Entities - Full Width
+                    st.markdown("---")
+                    st.markdown("#### 🏷️ Named Entities")
+                    with st.container():
                         st.markdown(entities)
                     
-                    with col2:
-                        st.markdown("#### 🎯 Themes")
-                        st.markdown(themes)
-                        
-                        st.markdown("#### 💬 Key Quotes")
+                    # Key Quotes - Full Width
+                    st.markdown("---")
+                    st.markdown("#### 💬 Important Quotes")
+                    with st.container():
                         st.markdown(quotes)
                     
-                    with col3:
-                        st.markdown("#### 🔑 Keywords")
-                        st.markdown(keywords)
-                        
-                        st.markdown("#### 💡 Insights")
+                    # Research Insights - Full Width
+                    st.markdown("---")
+                    st.markdown("#### 💡 Research Insights")
+                    with st.container():
                         st.markdown(insights)
                     
+                    st.markdown("---")
                     st.success("✅ Analysis complete!")
         
         with col2:
