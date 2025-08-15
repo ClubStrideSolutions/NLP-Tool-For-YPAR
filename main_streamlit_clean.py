@@ -1053,30 +1053,134 @@ class Visualizer:
     
     @staticmethod
     def create_wordcloud(text: str) -> go.Figure:
-        """Create word cloud visualization"""
+        """Create high-quality word cloud visualization"""
         try:
-            wordcloud = WordCloud(
-                width=800,
-                height=400,
-                background_color='white',
-                colormap='Blues',
-                max_words=50
-            ).generate(text)
+            # Clean the text for better word cloud
+            import re
+            from nltk.corpus import stopwords as nltk_stopwords
             
+            # Get stopwords
+            try:
+                stop_words = set(nltk_stopwords.words('english'))
+            except:
+                stop_words = set(['the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 
+                                 'of', 'with', 'by', 'from', 'as', 'is', 'was', 'are', 'were', 'been',
+                                 'be', 'have', 'has', 'had', 'do', 'does', 'did', 'will', 'would', 'could',
+                                 'should', 'may', 'might', 'must', 'shall', 'can', 'need', 'dare', 'ought',
+                                 'i', 'me', 'my', 'myself', 'we', 'our', 'ours', 'ourselves', 'you', 'your',
+                                 'yours', 'yourself', 'yourselves', 'he', 'him', 'his', 'himself', 'she',
+                                 'her', 'hers', 'herself', 'it', 'its', 'itself', 'they', 'them', 'their',
+                                 'theirs', 'themselves', 'what', 'which', 'who', 'whom', 'this', 'that',
+                                 'these', 'those', 'am', 'if', 'because', 'until', 'while', 'about',
+                                 'against', 'between', 'into', 'through', 'during', 'before', 'after',
+                                 'above', 'below', 'up', 'down', 'out', 'off', 'over', 'under', 'again',
+                                 'further', 'then', 'once'])
+            
+            # Add common words to exclude
+            stop_words.update(['said', 'would', 'could', 'also', 'one', 'two', 'three', 'first', 
+                             'second', 'new', 'just', 'like', 'get', 'got', 'can', 'will', 'now',
+                             'see', 'make', 'made', 'find', 'found', 'use', 'used', 'using'])
+            
+            # Clean text
+            text_clean = re.sub(r'[^\w\s]', ' ', text)
+            text_clean = re.sub(r'\d+', '', text_clean)
+            text_clean = ' '.join([word for word in text_clean.split() if word.lower() not in stop_words and len(word) > 2])
+            
+            # Create high-quality word cloud
+            wordcloud = WordCloud(
+                width=1600,  # Higher resolution
+                height=800,   # Higher resolution
+                background_color='white',
+                colormap='viridis',  # Better color scheme
+                max_words=100,  # More words
+                relative_scaling=0.5,  # Better word sizing
+                min_font_size=12,  # Minimum readable font
+                max_font_size=80,  # Maximum font size
+                stopwords=stop_words,
+                contour_width=0,
+                contour_color='steelblue',
+                prefer_horizontal=0.7,  # Mix of orientations
+                random_state=42,
+                collocations=True,  # Include phrases
+                margin=20  # Add margin
+            ).generate(text_clean if text_clean else text)
+            
+            # Convert to matplotlib figure for better quality
+            import matplotlib.pyplot as plt
+            import io
+            import base64
+            from PIL import Image
+            import numpy as np
+            
+            # Create matplotlib figure
+            fig_mpl, ax = plt.subplots(figsize=(16, 8), dpi=100)
+            ax.imshow(wordcloud, interpolation='bilinear')
+            ax.axis('off')
+            ax.set_facecolor('white')
+            fig_mpl.patch.set_facecolor('white')
+            plt.tight_layout(pad=0)
+            
+            # Convert to image
+            buf = io.BytesIO()
+            plt.savefig(buf, format='png', dpi=150, bbox_inches='tight', pad_inches=0.1, facecolor='white')
+            buf.seek(0)
+            plt.close(fig_mpl)
+            
+            # Read image and create plotly figure
+            from PIL import Image
+            img = Image.open(buf)
+            img_array = np.array(img)
+            
+            # Create plotly figure with the high-quality image
             fig = go.Figure()
-            fig.add_trace(go.Image(z=wordcloud.to_array()))
+            fig.add_trace(go.Image(z=img_array))
             fig.update_layout(
-                title="Word Cloud",
-                xaxis=dict(showticklabels=False, showgrid=False, zeroline=False),
-                yaxis=dict(showticklabels=False, showgrid=False, zeroline=False),
-                height=400
+                title=dict(
+                    text="Word Cloud Analysis",
+                    font=dict(size=20, color='#003262'),
+                    x=0.5,
+                    xanchor='center'
+                ),
+                xaxis=dict(showticklabels=False, showgrid=False, zeroline=False, visible=False),
+                yaxis=dict(showticklabels=False, showgrid=False, zeroline=False, visible=False),
+                height=500,
+                margin=dict(t=50, b=0, l=0, r=0),
+                paper_bgcolor='white',
+                plot_bgcolor='white',
+                hoverlabel=dict(bgcolor="white", font_size=14, font_family="Arial")
             )
+            
+            # Add subtle border
+            fig.update_xaxes(showline=True, linewidth=1, linecolor='lightgray', mirror=True)
+            fig.update_yaxes(showline=True, linewidth=1, linecolor='lightgray', mirror=True)
+            
             return fig
+            
         except Exception as e:
             logger.error(f"Wordcloud generation failed: {e}")
-            fig = go.Figure()
-            fig.add_annotation(text="Wordcloud generation failed", x=0.5, y=0.5)
-            return fig
+            # Fallback to simple version
+            try:
+                wordcloud = WordCloud(
+                    width=1200,
+                    height=600,
+                    background_color='white',
+                    colormap='Blues',
+                    max_words=75
+                ).generate(text)
+                
+                fig = go.Figure()
+                fig.add_trace(go.Image(z=wordcloud.to_array()))
+                fig.update_layout(
+                    title="Word Cloud",
+                    xaxis=dict(showticklabels=False, showgrid=False, zeroline=False),
+                    yaxis=dict(showticklabels=False, showgrid=False, zeroline=False),
+                    height=500
+                )
+                return fig
+            except:
+                fig = go.Figure()
+                fig.add_annotation(text="Word cloud generation unavailable", x=0.5, y=0.5)
+                return fig
     
     @staticmethod
     def create_sentiment_chart(sentiments: List[float]) -> go.Figure:
