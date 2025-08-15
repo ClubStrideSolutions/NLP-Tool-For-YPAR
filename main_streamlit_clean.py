@@ -1745,11 +1745,7 @@ def show_analysis():
                             for concept in topics_data.get('concepts', [])[:10]:
                                 st.write(f"• {concept}")
                         
-                        # Show network visualization
-                        st.markdown("**Topic Network Visualization:**")
-                        visualizer = Visualizer()
-                        network_fig = visualizer.create_topics_network(topics_data)
-                        st.plotly_chart(network_fig, use_container_width=True)
+                        st.info("💡 **Tip:** Check the Visualizations page to see an interactive network graph of these connections!")
                     
                     st.markdown("---")
                     st.success("✅ Analysis complete!")
@@ -1930,10 +1926,7 @@ Concepts: {', '.join(topics_data.get('concepts', [])[:10])}
                         for concept in topics_data.get('concepts', [])[:10]:
                             st.write(f"• {concept}")
                     
-                    # Show network
-                    visualizer = Visualizer()
-                    network_fig = visualizer.create_topics_network(topics_data)
-                    st.plotly_chart(network_fig, use_container_width=True)
+                    st.info("🎨 **Want to see how these connect?** Head to the Visualizations page for an interactive network graph!")
         
         st.markdown("---")
         st.markdown("### 💬 Chat With Your Document")
