@@ -718,6 +718,174 @@ class TextAnalyzer:
             logger.error(f"Insight generation failed: {e}")
             return "Insight generation unavailable"
     
+    def extract_topics_categories(self, text: str, file_id: str) -> Dict[str, Any]:
+        """Extract topics, categories, and concepts with relationships"""
+        cached = db_manager.get_from_cache(file_id, "topics_categories")
+        if cached:
+            return cached
+        
+        results = {
+            'topics': [],
+            'categories': [],
+            'concepts': [],
+            'relationships': []
+        }
+        
+        if self.ai_enabled:
+            # Use AI for sophisticated extraction
+            prompt = """Analyze this text and extract:
+            1. Main TOPICS (5-7 broad subject areas)
+            2. CATEGORIES (classify into: Technical, Social, Political, Economic, Cultural, Environmental, Academic)
+            3. Key CONCEPTS (important ideas, theories, or terms)
+            
+            Format each clearly labeled."""
+            
+            ai_result = self._ai_analyze(text, prompt, max_tokens=800)
+            if ai_result:
+                try:
+                    lines = ai_result.strip().split('\n')
+                    current_section = None
+                    
+                    for line in lines:
+                        line = line.strip()
+                        if not line:
+                            continue
+                            
+                        if 'TOPIC' in line.upper():
+                            current_section = 'topics'
+                        elif 'CATEGOR' in line.upper():
+                            current_section = 'categories'
+                        elif 'CONCEPT' in line.upper():
+                            current_section = 'concepts'
+                        elif current_section and ':' in line:
+                            content = line.split(':', 1)[-1].strip()
+                            content = re.sub(r'^[-•*]\s*', '', content).strip()
+                            if content and len(content) > 2:
+                                results[current_section].append(content[:100])
+                        elif current_section and line and not line[0].isdigit():
+                            content = re.sub(r'^[-•*]\s*', '', line).strip()
+                            if content and len(content) > 2:
+                                results[current_section].append(content[:100])
+                except Exception as e:
+                    logger.error(f"AI parsing failed: {e}")
+        
+        # Traditional extraction using TF-IDF and clustering
+        if not results['topics'] or len(results['topics']) < 3:
+            try:
+                from sklearn.feature_extraction.text import TfidfVectorizer
+                from sklearn.decomposition import LatentDirichletAllocation
+                
+                # Prepare text
+                sentences = sent_tokenize(text) if NLTK_AVAILABLE else text.split('. ')
+                
+                # Extract topics using LDA
+                vectorizer = TfidfVectorizer(
+                    max_features=100,
+                    stop_words='english',
+                    ngram_range=(1, 3),
+                    min_df=1
+                )
+                
+                doc_term_matrix = vectorizer.fit_transform(sentences[:200])
+                
+                # LDA for topics
+                lda = LatentDirichletAllocation(n_components=7, random_state=42, max_iter=20)
+                lda.fit(doc_term_matrix)
+                
+                feature_names = vectorizer.get_feature_names_out()
+                
+                # Extract topics
+                for topic_idx, topic in enumerate(lda.components_):
+                    top_indices = topic.argsort()[-10:][::-1]
+                    top_words = [feature_names[i] for i in top_indices[:5]]
+                    topic_name = ', '.join(top_words[:3])
+                    results['topics'].append(topic_name)
+                    
+                    # Categorize based on keywords
+                    topic_lower = topic_name.lower()
+                    if any(word in topic_lower for word in ['data', 'system', 'software', 'computer', 'technology']):
+                        category = 'Technical'
+                    elif any(word in topic_lower for word in ['social', 'people', 'community', 'society', 'human']):
+                        category = 'Social'
+                    elif any(word in topic_lower for word in ['policy', 'government', 'political', 'law']):
+                        category = 'Political'
+                    elif any(word in topic_lower for word in ['economic', 'money', 'cost', 'market', 'business']):
+                        category = 'Economic'
+                    elif any(word in topic_lower for word in ['culture', 'cultural', 'tradition', 'values']):
+                        category = 'Cultural'
+                    elif any(word in topic_lower for word in ['environment', 'climate', 'nature', 'ecological']):
+                        category = 'Environmental'
+                    elif any(word in topic_lower for word in ['research', 'study', 'analysis', 'academic']):
+                        category = 'Academic'
+                    else:
+                        category = 'General'
+                    
+                    if category not in results['categories']:
+                        results['categories'].append(category)
+                    
+                    # Extract key concepts
+                    for word in top_words[:3]:
+                        if word not in results['concepts'] and len(word) > 3:
+                            results['concepts'].append(word)
+                
+                # Create relationships between topics
+                for i, topic1 in enumerate(results['topics']):
+                    for j, topic2 in enumerate(results['topics'][i+1:], i+1):
+                        words1 = set(topic1.lower().split(', '))
+                        words2 = set(topic2.lower().split(', '))
+                        shared = words1 & words2
+                        
+                        if shared:
+                            strength = 'strong' if len(shared) > 1 else 'medium'
+                        else:
+                            # Check for semantic similarity
+                            strength = 'weak'
+                        
+                        results['relationships'].append({
+                            'source': topic1.split(',')[0].strip()[:30],
+                            'target': topic2.split(',')[0].strip()[:30],
+                            'strength': strength
+                        })
+                        
+                        if len(results['relationships']) >= 20:
+                            break
+                    if len(results['relationships']) >= 20:
+                        break
+                        
+            except Exception as e:
+                logger.error(f"Topic extraction failed: {e}")
+                # Simple fallback
+                words = word_tokenize(text.lower()) if NLTK_AVAILABLE else text.lower().split()
+                word_freq = Counter([w for w in words if len(w) > 4 and w.isalpha()])
+                top_words = word_freq.most_common(20)
+                
+                results['topics'] = [word for word, _ in top_words[:7]]
+                results['categories'] = ['General', 'Academic']
+                results['concepts'] = [word for word, _ in top_words[7:15]]
+                
+                # Simple relationships
+                for i in range(min(5, len(results['topics'])-1)):
+                    results['relationships'].append({
+                        'source': results['topics'][i][:30],
+                        'target': results['topics'][i+1][:30],
+                        'strength': 'medium'
+                    })
+        
+        # Ensure we have at least some relationships for visualization
+        if not results['relationships'] and results['topics']:
+            # Create a star pattern with first topic at center
+            center = results['topics'][0] if results['topics'] else "Main Topic"
+            for topic in results['topics'][1:6]:
+                results['relationships'].append({
+                    'source': center.split(',')[0].strip()[:30],
+                    'target': topic.split(',')[0].strip()[:30],
+                    'strength': 'medium'
+                })
+        
+        # Store results
+        db_manager.store_analysis(file_id, "topics_categories", results)
+        return results
+    
     def answer_question(self, text: str, question: str, file_id: str) -> str:
         """Answer questions about the text"""
         if self.ai_enabled:
@@ -929,6 +1097,185 @@ class Visualizer:
             height=350
         )
         return fig
+    
+    @staticmethod
+    def create_topics_network(topics_data: Dict[str, Any]) -> go.Figure:
+        """Create an interactive network plot of topics, categories, and concepts"""
+        try:
+            import networkx as nx
+            
+            G = nx.Graph()
+            
+            # Add nodes for topics
+            topics = topics_data.get('topics', [])
+            categories = topics_data.get('categories', [])
+            concepts = topics_data.get('concepts', [])
+            relationships = topics_data.get('relationships', [])
+            
+            # Add all nodes with attributes
+            for topic in topics[:10]:  # Limit for visualization
+                G.add_node(topic[:30], node_type='topic', size=30)
+            
+            for category in categories[:5]:
+                G.add_node(category, node_type='category', size=25)
+            
+            for concept in concepts[:15]:
+                G.add_node(concept[:20], node_type='concept', size=15)
+            
+            # Add edges from relationships
+            for rel in relationships:
+                source = rel.get('source', '')[:30]
+                target = rel.get('target', '')[:30]
+                strength = rel.get('strength', 'medium')
+                
+                if source in G.nodes() and target in G.nodes():
+                    weight = {'strong': 3, 'medium': 2, 'weak': 1}.get(strength, 1)
+                    G.add_edge(source, target, weight=weight)
+            
+            # Add connections between categories and topics
+            for topic in topics[:10]:
+                topic_short = topic[:30]
+                topic_lower = topic.lower()
+                
+                # Connect to appropriate category
+                if 'technical' in categories or 'Technical' in categories:
+                    if any(word in topic_lower for word in ['data', 'system', 'software']):
+                        G.add_edge(topic_short, 'Technical', weight=2)
+                
+                if 'social' in categories or 'Social' in categories:
+                    if any(word in topic_lower for word in ['social', 'people', 'community']):
+                        G.add_edge(topic_short, 'Social', weight=2)
+            
+            # Use spring layout for better visualization
+            pos = nx.spring_layout(G, k=2, iterations=50, seed=42)
+            
+            # Create edge traces
+            edge_traces = []
+            for edge in G.edges(data=True):
+                x0, y0 = pos[edge[0]]
+                x1, y1 = pos[edge[1]]
+                weight = edge[2].get('weight', 1)
+                
+                edge_trace = go.Scatter(
+                    x=[x0, x1, None],
+                    y=[y0, y1, None],
+                    mode='lines',
+                    line=dict(
+                        width=weight,
+                        color='rgba(125,125,125,0.5)'
+                    ),
+                    hoverinfo='none',
+                    showlegend=False
+                )
+                edge_traces.append(edge_trace)
+            
+            # Create node traces by type
+            node_traces = []
+            
+            # Topics (large blue nodes)
+            topic_nodes = [node for node, attr in G.nodes(data=True) if attr.get('node_type') == 'topic']
+            if topic_nodes:
+                x_topics = [pos[node][0] for node in topic_nodes]
+                y_topics = [pos[node][1] for node in topic_nodes]
+                
+                topic_trace = go.Scatter(
+                    x=x_topics,
+                    y=y_topics,
+                    mode='markers+text',
+                    name='Topics',
+                    text=topic_nodes,
+                    textposition="top center",
+                    textfont=dict(size=10, color='#003262'),
+                    marker=dict(
+                        size=25,
+                        color='#003262',
+                        line=dict(color='#FDB515', width=2),
+                        symbol='circle'
+                    ),
+                    hovertemplate='<b>Topic:</b> %{text}<extra></extra>'
+                )
+                node_traces.append(topic_trace)
+            
+            # Categories (medium gold nodes)
+            category_nodes = [node for node, attr in G.nodes(data=True) if attr.get('node_type') == 'category']
+            if category_nodes:
+                x_categories = [pos[node][0] for node in category_nodes]
+                y_categories = [pos[node][1] for node in category_nodes]
+                
+                category_trace = go.Scatter(
+                    x=x_categories,
+                    y=y_categories,
+                    mode='markers+text',
+                    name='Categories',
+                    text=category_nodes,
+                    textposition="bottom center",
+                    textfont=dict(size=9, color='#FDB515'),
+                    marker=dict(
+                        size=20,
+                        color='#FDB515',
+                        line=dict(color='#003262', width=2),
+                        symbol='square'
+                    ),
+                    hovertemplate='<b>Category:</b> %{text}<extra></extra>'
+                )
+                node_traces.append(category_trace)
+            
+            # Concepts (small gray nodes)
+            concept_nodes = [node for node, attr in G.nodes(data=True) if attr.get('node_type') == 'concept']
+            if concept_nodes:
+                x_concepts = [pos[node][0] for node in concept_nodes]
+                y_concepts = [pos[node][1] for node in concept_nodes]
+                
+                concept_trace = go.Scatter(
+                    x=x_concepts,
+                    y=y_concepts,
+                    mode='markers+text',
+                    name='Concepts',
+                    text=concept_nodes,
+                    textposition="middle right",
+                    textfont=dict(size=8, color='gray'),
+                    marker=dict(
+                        size=12,
+                        color='lightgray',
+                        line=dict(color='gray', width=1),
+                        symbol='diamond'
+                    ),
+                    hovertemplate='<b>Concept:</b> %{text}<extra></extra>'
+                )
+                node_traces.append(concept_trace)
+            
+            # Create figure
+            fig = go.Figure(data=edge_traces + node_traces)
+            
+            fig.update_layout(
+                title="Topics, Categories & Concepts Network",
+                showlegend=True,
+                hovermode='closest',
+                xaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
+                yaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
+                plot_bgcolor='white',
+                height=600,
+                legend=dict(
+                    orientation="h",
+                    yanchor="bottom",
+                    y=1.02,
+                    xanchor="right",
+                    x=1
+                )
+            )
+            
+            return fig
+            
+        except Exception as e:
+            logger.error(f"Network visualization failed: {e}")
+            fig = go.Figure()
+            fig.add_annotation(
+                text=f"Network visualization unavailable: {str(e)}",
+                x=0.5, y=0.5,
+                xref="paper", yref="paper",
+                showarrow=False
+            )
+            return fig
     
     @staticmethod
     def create_theme_network(themes: List[str], connections: List[Tuple[str, str]]) -> go.Figure:
@@ -1176,8 +1523,12 @@ def show_analysis():
                     progress.progress(0.75)
                     quotes = text_analyzer.extract_quotes(text, selected_file_id)
                     
-                    progress.progress(0.90)
+                    progress.progress(0.80)
                     insights = text_analyzer.generate_insights(text, selected_file_id)
+                    
+                    # 7. Topics, Categories & Concepts
+                    progress.progress(0.95)
+                    topics_data = text_analyzer.extract_topics_categories(text, selected_file_id)
                     
                     progress.progress(1.0)
                     
@@ -1218,6 +1569,33 @@ def show_analysis():
                     st.markdown("#### 💡 Research Insights")
                     with st.container():
                         st.markdown(insights)
+                    
+                    # Topics, Categories & Concepts - Full Width
+                    st.markdown("---")
+                    st.markdown("#### 🎯 Topics, Categories & Concepts")
+                    with st.container():
+                        col1, col2, col3 = st.columns(3)
+                        
+                        with col1:
+                            st.markdown("**Topics:**")
+                            for topic in topics_data.get('topics', [])[:7]:
+                                st.write(f"• {topic}")
+                        
+                        with col2:
+                            st.markdown("**Categories:**")
+                            for category in topics_data.get('categories', []):
+                                st.write(f"• {category}")
+                        
+                        with col3:
+                            st.markdown("**Key Concepts:**")
+                            for concept in topics_data.get('concepts', [])[:10]:
+                                st.write(f"• {concept}")
+                        
+                        # Show network visualization
+                        st.markdown("**Topic Network Visualization:**")
+                        visualizer = Visualizer()
+                        network_fig = visualizer.create_topics_network(topics_data)
+                        st.plotly_chart(network_fig, use_container_width=True)
                     
                     st.markdown("---")
                     st.success("✅ Analysis complete!")
@@ -1260,6 +1638,31 @@ def show_analysis():
                     result = text_analyzer.generate_insights(text, selected_file_id)
                     st.markdown("### Research Insights")
                     st.markdown(result)
+            
+            if st.button("🎯 Topics & Concepts", use_container_width=True):
+                with st.spinner("Extracting topics and concepts..."):
+                    topics_data = text_analyzer.extract_topics_categories(text, selected_file_id)
+                    st.markdown("### Topics, Categories & Concepts")
+                    
+                    col1, col2 = st.columns(2)
+                    with col1:
+                        st.markdown("**Topics:**")
+                        for topic in topics_data.get('topics', [])[:7]:
+                            st.write(f"• {topic}")
+                        
+                        st.markdown("**Categories:**")
+                        for category in topics_data.get('categories', []):
+                            st.write(f"• {category}")
+                    
+                    with col2:
+                        st.markdown("**Key Concepts:**")
+                        for concept in topics_data.get('concepts', [])[:10]:
+                            st.write(f"• {concept}")
+                    
+                    # Show network
+                    visualizer = Visualizer()
+                    network_fig = visualizer.create_topics_network(topics_data)
+                    st.plotly_chart(network_fig, use_container_width=True)
         
         st.markdown("---")
         st.markdown("### 💬 Ask Questions About This Document")
@@ -1324,6 +1727,49 @@ def show_visualizations():
                 st.plotly_chart(fig, use_container_width=True)
         except Exception as e:
             st.error(f"Could not create sentiment chart: {e}")
+        
+        # Topics & Concepts Network
+        st.markdown("### 🕸️ Topics, Categories & Concepts Network")
+        try:
+            text_analyzer = TextAnalyzer()
+            topics_data = text_analyzer.extract_topics_categories(text, selected_file_id)
+            
+            if topics_data and topics_data.get('topics'):
+                # Display summary
+                col1, col2, col3 = st.columns(3)
+                with col1:
+                    st.metric("Topics", len(topics_data.get('topics', [])))
+                with col2:
+                    st.metric("Categories", len(topics_data.get('categories', [])))
+                with col3:
+                    st.metric("Concepts", len(topics_data.get('concepts', [])))
+                
+                # Create and display network
+                fig = visualizer.create_topics_network(topics_data)
+                st.plotly_chart(fig, use_container_width=True)
+                
+                # Show details in expander
+                with st.expander("View Details"):
+                    col1, col2, col3 = st.columns(3)
+                    
+                    with col1:
+                        st.markdown("**Topics:**")
+                        for topic in topics_data.get('topics', [])[:10]:
+                            st.write(f"• {topic}")
+                    
+                    with col2:
+                        st.markdown("**Categories:**")
+                        for category in topics_data.get('categories', []):
+                            st.write(f"• {category}")
+                    
+                    with col3:
+                        st.markdown("**Concepts:**")
+                        for concept in topics_data.get('concepts', [])[:15]:
+                            st.write(f"• {concept}")
+            else:
+                st.info("Run Topics & Concepts analysis first from the Text Analysis page")
+        except Exception as e:
+            st.error(f"Could not create topics network: {e}")
 
 def show_history():
     """Display analysis history"""
